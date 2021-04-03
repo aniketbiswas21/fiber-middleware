@@ -26,9 +26,26 @@ func AuthenticateMiddleware(configName string) fiber.Handler {
 	}
 }
 
+func CallbackMiddleware(configName string) fiber.Handler {
+	config, err := minion.GetConfigByName(appConfigs, configName)
+	if err != nil {
+		panic("undefined config called")
+	}
+	return func(c *fiber.Ctx) error {
+		accessToken := c.Query("access_token")
+		response, err := minion.GetUserProfile(config, accessToken)
+		if err != nil {
+			panic("undefined config called")
+		}
+		config.ProfileProcessor(response, c)
+		return nil
+	}
+}
+
 func Init(configs []models.ApplicationConfig) models.UniAuthInstance {
 	uniAuthInstance = models.UniAuthInstance{
 		Authenticate: AuthenticateMiddleware,
+		Callback:     CallbackMiddleware,
 	}
 	fmt.Println("UniAuth Module Injected")
 	appConfigs = configs
