@@ -29,8 +29,9 @@ func main() {
 			RedirectUri:     "http://localhost:3000/callback",
 			AuthEndpoint:    "account/o/login",
 			ProfileEndpoint: "account/o/access",
-			ProfileProcessor: func(details string) {
+			ProfileProcessor: func(details string, c *fiber.Ctx) {
 				fmt.Println(details)
+				c.Next()
 			},
 		},
 		models.ApplicationConfig{
@@ -41,8 +42,9 @@ func main() {
 			RedirectUri:     "http://localhost:3000/callback",
 			AuthEndpoint:    "account/o/login",
 			ProfileEndpoint: "account/o/access",
-			ProfileProcessor: func(details string) {
+			ProfileProcessor: func(details string, c *fiber.Ctx) {
 				fmt.Println(details)
+				c.Next()
 			},
 		},
 	}
@@ -61,6 +63,13 @@ func main() {
 
 	// url to initiate login
 	app.Get("/login", uniAuth.Authenticate("server1"))
+	app.Get("/callback", uniAuth.Callback("server1"), func(c *fiber.Ctx) error {
+		data := ServerStatusStruct{
+			Status:  http.StatusOK,
+			Message: "Callback Successfull",
+		}
+		return c.JSON(data)
+	})
 
 	app.Listen(":3000")
 }

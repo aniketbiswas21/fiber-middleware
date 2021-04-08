@@ -2,7 +2,7 @@ package models
 
 import "github.com/gofiber/fiber/v2"
 
-type ProfileProcessorStruct func(userDetails string)
+type ProfileProcessorStruct func(userDetails string, next *fiber.Ctx)
 type AuthenticateStruct func(configName string) fiber.Handler
 type CallbackStruct func(configName string) fiber.Handler
 

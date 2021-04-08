@@ -26,9 +26,28 @@ func AuthenticateMiddleware(configName string) fiber.Handler {
 	}
 }
 
+// CallBackMiddleware handles the response from OAuth server and fetches user details
+func CallbackMiddleware(configName string) fiber.Handler {
+	config, err := minion.GetConfigByName(appConfigs, configName)
+	if err != nil {
+		panic("undefined config called")
+	}
+	return func(c *fiber.Ctx) error {
+		accessToken := c.Query("access_token")
+		response, err := minion.GetUserProfile(config, accessToken)
+		if err != nil {
+			panic("undefined config called")
+		}
+		config.ProfileProcessor(response, c)
+		return nil
+	}
+}
+
+// Init acts as a constructor to initiate the auth module
 func Init(configs []models.ApplicationConfig) models.UniAuthInstance {
 	uniAuthInstance = models.UniAuthInstance{
 		Authenticate: AuthenticateMiddleware,
+		Callback:     CallbackMiddleware,
 	}
 	fmt.Println("UniAuth Module Injected")
 	appConfigs = configs
